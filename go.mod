@@ -1,4 +1,4 @@
-module github.com/fatih/gomodifytags
+module github.com/cavebeavis/gomodifytags
 
 go 1.16
 
