@@ -752,6 +752,31 @@ func (c *config) rewrite(node ast.Node, start, end int) (ast.Node, error) {
 				for _, field := range f.Names {
 					if !c.skipUnexportedFields || isPublicName(field.Name) {
 						fieldName = field.Name
+						var okToTag bool
+						if astField, ok := field.Obj.Decl.(*ast.Field); ok {
+							switch astField.Type.(type) {
+							case *ast.Ident:
+								okToTag = isBuiltInType(astField.Type.(*ast.Ident).Name)
+							
+							case *ast.ArrayType:
+								if ident, ok := astField.Type.(*ast.ArrayType).Elt.(*ast.Ident); ok {
+									okToTag = isBuiltInType(ident.Name)
+								}
+
+							case *ast.StarExpr:
+								if ident, ok := astField.Type.(*ast.StarExpr).X.(*ast.Ident); ok {
+									okToTag = isBuiltInType(ident.Name)
+								}
+
+							case *ast.MapType:
+								
+							}
+						}
+
+						if !okToTag && c.transform == "envcase" {
+							fieldName = ""
+						}
+						
 						break
 					}
 				}
@@ -768,6 +793,8 @@ func (c *config) rewrite(node ast.Node, start, end int) (ast.Node, error) {
 					fieldName = ident.Name
 				}
 			}
+
+			fieldName = strings.TrimSpace(fieldName)
 
 			// nothing to process, continue with next line
 			if fieldName == "" {
@@ -967,13 +994,53 @@ func (c *config) printEnvs(in string) error {
 		}
 	}
 
+	sorted := sort.StringSlice(envs)
+	sorted.Sort()
+
 	f, err := os.Create(c.printEnvFileName)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
 
-	_, err = f.WriteString(strings.Join(envs, "\n"))
+	_, err = f.WriteString(strings.Join(sorted, "\n"))
 
 	return err
+}
+
+var (
+	builtIns = map[string]struct{}{
+		// ****** Numerical types ****** //
+		"uint":{},        //either 32 or 64 bits
+	  "uint8":{},       //the set of all unsigned  8-bit integers (0 to 255)
+		"uint16":{},      //the set of all unsigned 16-bit integers (0 to 65535)
+  	"uint32":{},      //the set of all unsigned 32-bit integers (0 to 4294967295)
+  	"uint64":{},      //the set of all unsigned 64-bit integers (0 to 18446744073709551615)
+
+		"int":{},         //same size as uint
+  	"int8":{},        //the set of all signed  8-bit integers (-128 to 127)
+  	"int16":{},       //the set of all signed 16-bit integers (-32768 to 32767)
+  	"int32":{},       //the set of all signed 32-bit integers (-2147483648 to 2147483647)
+  	"int64":{},       //the set of all signed 64-bit integers (-9223372036854775808 to 9223372036854775807)
+
+  	"float32":{},     //the set of all IEEE-754 32-bit floating-point numbers
+  	"float64":{},     //the set of all IEEE-754 64-bit floating-point numbers
+
+  	"complex64":{},   //the set of all complex numbers with float32 real and imaginary parts
+  	"complex128":{},  //the set of all complex numbers with float64 real and imaginary parts
+
+  	"byte":{},        //alias for uint8
+  	"rune":{},        //alias for int32
+
+		// ****** String type  ****** //
+		"string":{},
+
+		// ****** Boolean type ****** //
+		"bool": {},
+	}
+)
+
+func isBuiltInType(typ string) bool {
+	_, ok := builtIns[typ]
+	return ok
 }
