@@ -1,0 +1,51 @@
+package foo
+
+type foo1 struct {
+	bar       string   `conf:"env:FOO1_BAR,noprint"`
+	MyExample bool     `conf:"env:FOO1_MY_EXAMPLE,noprint"`
+	MyAnother []string `conf:"env:FOO1_MY_ANOTHER,noprint"`
+}
+
+type foo2 struct {
+	AnotherVar string `conf:"env:FOO2_ANOTHER_VAR,noprint"`
+	SliceMan   []foo3
+	MapMaker   map[string]foo4
+
+	// ****** Numerical types ****** //
+	Uint   uint   `conf:"env:FOO2_UINT,noprint"`    //either 32 or 64 bits
+	Uint8  uint8  `conf:"env:FOO2_UINT_8,noprint"`  //the set of all unsigned  8-bit integers (0 to 255)
+	Uint16 uint16 `conf:"env:FOO2_UINT_16,noprint"` //the set of all unsigned 16-bit integers (0 to 65535)
+	Uint32 uint32 `conf:"env:FOO2_UINT_32,noprint"` //the set of all unsigned 32-bit integers (0 to 4294967295)
+	Uint64 uint64 `conf:"env:FOO2_UINT_64,noprint"` //the set of all unsigned 64-bit integers (0 to 18446744073709551615)
+
+	Int   int   `conf:"env:FOO2_INT,noprint"`    //same size as uint
+	Int8  int8  `conf:"env:FOO2_INT_8,noprint"`  //the set of all signed  8-bit integers (-128 to 127)
+	Int16 int16 `conf:"env:FOO2_INT_16,noprint"` //the set of all signed 16-bit integers (-32768 to 32767)
+	Int32 int32 `conf:"env:FOO2_INT_32,noprint"` //the set of all signed 32-bit integers (-2147483648 to 2147483647)
+	Int64 int64 `conf:"env:FOO2_INT_64,noprint"` //the set of all signed 64-bit integers (-9223372036854775808 to 9223372036854775807)
+
+	Float32 float32 `conf:"env:FOO2_FLOAT_32,noprint"` //the set of all IEEE-754 32-bit floating-point numbers
+	Float64 float64 `conf:"env:FOO2_FLOAT_64,noprint"` //the set of all IEEE-754 64-bit floating-point numbers
+
+	Complex64  complex64  `conf:"env:FOO2_COMPLEX_64,noprint"`  //the set of all complex numbers with float32 real and imaginary parts
+	Complex128 complex128 `conf:"env:FOO2_COMPLEX_128,noprint"` //the set of all complex numbers with float64 real and imaginary parts
+
+	Byte byte `conf:"env:FOO2_BYTE,noprint"` //alias for uint8
+	Rune rune `conf:"env:FOO2_RUNE,noprint"` //alias for int32
+
+	//Uintptr    uintptr     //an unsigned integer large enough to store the uninterpreted bits of a pointer value
+
+	// ****** String types ****** //
+	String string  `conf:"env:FOO2_STRING,noprint"`
+	PtrID  *string `conf:"env:FOO2_PTR_ID,noprint"`
+}
+
+type foo4 struct {
+	Happy   string `conf:"env:FOO4_HAPPY,noprint"`
+	UnHappy int    `conf:"env:FOO4_UN_HAPPY,noprint"`
+}
+
+type foo3 struct {
+	ButtersBadBear   string `conf:"env:FOO3_BUTTERS_BAD_BEAR,noprint"`
+	JohnnySilverhand string `conf:"env:FOO3_JOHNNY_SILVERHAND,noprint"`
+}
